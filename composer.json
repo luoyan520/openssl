@@ -1,0 +1,29 @@
+{
+  "name": "luoyan/openssl",
+  "description": "LuoYan openssl Encryption And Decryption Algorithm",
+  "type": "think-extend",
+  "keywords": [
+    "LuoYan",
+    "openssl"
+  ],
+  "homepage": "http://www.52luoyan.com/",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "LuoYan",
+      "email": "51085726@qq.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.4.0",
+    "topthink/framework": "^6.0.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "LuoYan\\": "src"
+    }
+  },
+  "config": {
+    "preferred-install": "dist"
+  }
+}
