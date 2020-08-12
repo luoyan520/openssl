@@ -67,8 +67,7 @@ class OpenSSL
      */
     public function rsaPublicEncrypt(string $string): array
     {
-        $key = $this->publicKey;
-        if (!$key) {
+        if (!$this->publicKey) {
             return ret_array(-4, '未初始化，请执行rsaInit方法！');
         }
 
@@ -77,7 +76,7 @@ class OpenSSL
 
         foreach ($str_tmp as $value) {
             $result_tmp = '';
-            if (openssl_public_encrypt($value, $result_tmp, $key)) {
+            if (openssl_public_encrypt($value, $result_tmp, $this->publicKey)) {
                 $result .= $result_tmp . '[LY]';
             } else {
                 return ret_array(-3, '公钥加密失败！');
@@ -96,8 +95,7 @@ class OpenSSL
      */
     public function rsaPrivateEncrypt(string $string): array
     {
-        $key = $this->privateKey;
-        if (!$key) {
+        if (!$this->privateKey) {
             return ret_array(-4, '未初始化，请执行rsaInit方法！');
         }
 
@@ -106,7 +104,7 @@ class OpenSSL
 
         foreach ($str_tmp as $value) {
             $result_tmp = '';
-            if (openssl_private_encrypt($value, $result_tmp, $key)) {
+            if (openssl_private_encrypt($value, $result_tmp, $this->privateKey)) {
                 $result .= $result_tmp . '[LY]';
             } else {
                 return ret_array(-3, '私钥加密失败！');
@@ -125,8 +123,7 @@ class OpenSSL
      */
     public function rsaPublicDecrypt(string $string): array
     {
-        $key = $this->publicKey;
-        if (!$key) {
+        if (!$this->publicKey) {
             return ret_array(-4, '未初始化，请执行rsaInit方法！');
         }
 
@@ -136,7 +133,7 @@ class OpenSSL
 
         foreach ($str_tmp as $value) {
             $result_tmp = '';
-            $cache = openssl_public_decrypt($value, $result_tmp, $key);
+            $cache = openssl_public_decrypt($value, $result_tmp, $this->publicKey);
             if ($cache) {
                 $result .= $result_tmp;
             } else {
@@ -154,8 +151,7 @@ class OpenSSL
      */
     public function rsaPrivateDecrypt(string $string): array
     {
-        $key = $this->privateKey;
-        if (!$key) {
+        if (!$this->privateKey) {
             return ret_array(-4, '未初始化，请执行rsaInit方法！');
         }
 
@@ -165,7 +161,7 @@ class OpenSSL
 
         foreach ($str_tmp as $value) {
             $result_tmp = '';
-            if (openssl_private_decrypt($value, $result_tmp, $key)) {
+            if (openssl_private_decrypt($value, $result_tmp, $this->privateKey)) {
                 $result .= $result_tmp;
             } else {
                 return ret_array(-3, '私钥解密失败！');
