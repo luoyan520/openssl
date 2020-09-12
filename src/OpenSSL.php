@@ -36,7 +36,7 @@ class OpenSSL
      * @param string $publicKeyFilename 公钥文件地址
      * @param string $privateKeyFilename 私钥文件地址
      * @param string $keyPassword 私钥密码
-     * @return array code=1则初始化成功，msg表示返回消息
+     * @return array code=0则初始化成功，msg表示返回消息
      */
     public function rsaInit(string $publicKeyFilename = '', string $privateKeyFilename = '', string $keyPassword = ''): array
     {
@@ -45,7 +45,7 @@ class OpenSSL
         fclose($fp);
         $this->publicKey = openssl_get_publickey($publicKey);
         if (!$this->publicKey) {
-            return ret_array(-2, '无效的公钥！');
+            return ret_array(1, '无效的公钥！');
         }
 
         $fp = fopen($privateKeyFilename, 'r');
@@ -54,21 +54,21 @@ class OpenSSL
         $this->privateKey = openssl_get_privatekey($privateKey, $keyPassword);
         unset($keyPassword);
         if (!$this->privateKey) {
-            return ret_array(-2, '无效的私钥！');
+            return ret_array(1, '无效的私钥！');
         }
 
-        return ret_array(1, '初始化成功！');
+        return ret_array(0, '初始化成功！');
     }
 
     /**
      * RSA公钥加密
      * @param string $string 需要加密的明文
-     * @return array code=1则加密成功，msg表示密文或消息
+     * @return array code=0则加密成功，msg表示密文或消息
      */
     public function rsaPublicEncrypt(string $string): array
     {
         if (!$this->publicKey) {
-            return ret_array(-4, '未初始化，请执行rsaInit方法！');
+            return ret_array(3, '未初始化，请执行rsaInit方法！');
         }
 
         $result = '';
@@ -79,24 +79,24 @@ class OpenSSL
             if (openssl_public_encrypt($value, $result_tmp, $this->publicKey)) {
                 $result .= $result_tmp . '[LY]';
             } else {
-                return ret_array(-3, '公钥加密失败！');
+                return ret_array(2, '公钥加密失败！');
             }
             $result = rtrim($result, '[LY]');
         }
 
         $result = base64_encode($result);
-        return ret_array(1, '', ['token' => $result]);
+        return ret_array(0, '', ['token' => $result]);
     }
 
     /**
      * RSA私钥加密
      * @param string $string 需要解密的明文
-     * @return array code=1则加密成功，msg表示消息或密文
+     * @return array code=0则加密成功，msg表示消息或密文
      */
     public function rsaPrivateEncrypt(string $string): array
     {
         if (!$this->privateKey) {
-            return ret_array(-4, '未初始化，请执行rsaInit方法！');
+            return ret_array(3, '未初始化，请执行rsaInit方法！');
         }
 
         $result = '';
@@ -107,24 +107,24 @@ class OpenSSL
             if (openssl_private_encrypt($value, $result_tmp, $this->privateKey)) {
                 $result .= $result_tmp . '[LY]';
             } else {
-                return ret_array(-3, '私钥加密失败！');
+                return ret_array(2, '私钥加密失败！');
             }
             $result = rtrim($result, '[LY]');
         }
 
         $result = base64_encode($result);
-        return ret_array(1, '', ['token' => $result]);
+        return ret_array(0, '', ['token' => $result]);
     }
 
     /**
      * RSA公钥解密
      * @param string $string 密文
-     * @return array code=1则表示解密成功，msg为消息或明文
+     * @return array code=0则表示解密成功，msg为消息或明文
      */
     public function rsaPublicDecrypt(string $string): array
     {
         if (!$this->publicKey) {
-            return ret_array(-4, '未初始化，请执行rsaInit方法！');
+            return ret_array(3, '未初始化，请执行rsaInit方法！');
         }
 
         $result = '';
@@ -137,22 +137,22 @@ class OpenSSL
             if ($cache) {
                 $result .= $result_tmp;
             } else {
-                return ret_array(-3, '公钥解密失败！');
+                return ret_array(2, '公钥解密失败！');
             }
         }
 
-        return ret_array(1, '', ['text' => $result]);
+        return ret_array(0, '', ['text' => $result]);
     }
 
     /**
      * RSA私钥解密
      * @param string $string
-     * @return array code=1则表示解密成功，msg表示明文或消息
+     * @return array code=0则表示解密成功，msg表示明文或消息
      */
     public function rsaPrivateDecrypt(string $string): array
     {
         if (!$this->privateKey) {
-            return ret_array(-4, '未初始化，请执行rsaInit方法！');
+            return ret_array(3, '未初始化，请执行rsaInit方法！');
         }
 
         $result = '';
@@ -164,11 +164,11 @@ class OpenSSL
             if (openssl_private_decrypt($value, $result_tmp, $this->privateKey)) {
                 $result .= $result_tmp;
             } else {
-                return ret_array(-3, '私钥解密失败！');
+                return ret_array(2, '私钥解密失败！');
             }
         }
 
-        return ret_array(1, '', ['text' => $result]);
+        return ret_array(0, '', ['text' => $result]);
     }
 
     /**
@@ -183,9 +183,9 @@ class OpenSSL
         openssl_sign($string, $signature, $this->privateKey);
         if ($signature) {
             $signature = base64_encode($signature);
-            return ret_array(1, '', ['sign' => $signature]);
+            return ret_array(0, '', ['sign' => $signature]);
         } else {
-            return ret_array(-5, '签名失败！');
+            return ret_array(4, '签名失败！');
         }
     }
 
@@ -222,33 +222,33 @@ class OpenSSL
     /**
      * AES加密
      * @param string $string
-     * @return array code=1则加密成功，msg为消息或密文
+     * @return array code=0则加密成功，msg为消息或密文
      */
     public function aesEncrypt(string $string): array
     {
         if (!$this->key) {
-            return ret_array(-4, '未初始化，请执行aesInit方法！');
+            return ret_array(3, '未初始化，请执行aesInit方法！');
         }
 
         $result = openssl_encrypt($string, 'AES-128-ECB', $this->key, OPENSSL_RAW_DATA);
         $result = base64_encode($result);
-        return ret_array(1, '', ['token' => $result]);
+        return ret_array(0, '', ['token' => $result]);
     }
 
     /**
      * AES解密
      * @param $string
-     * @return array code=1则解密成功，msg为消息或明文
+     * @return array code=0则解密成功，msg为消息或明文
      */
     public function aesDecrypt(string $string): array
     {
         if (!$this->key) {
-            return ret_array(-4, '未初始化，请执行aesInit方法！');
+            return ret_array(3, '未初始化，请执行aesInit方法！');
         }
 
         $string = base64_decode($string);
         $result = openssl_decrypt($string, 'AES-128-ECB', $this->key, OPENSSL_RAW_DATA);
-        return ret_array(1, '', ['text' => $result]);
+        return ret_array(0, '', ['text' => $result]);
     }
 
     /**

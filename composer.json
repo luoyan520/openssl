@@ -16,7 +16,8 @@
   ],
   "require": {
     "php": ">=7.4.0",
-    "topthink/framework": "^6.0.1"
+    "topthink/framework": "^6.0.1",
+    "ext-openssl": "*"
   },
   "autoload": {
     "psr-4": {
