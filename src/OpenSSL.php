@@ -212,26 +212,26 @@ class OpenSSL
      * AES加密
      * @param string $string 要加密的内容
      * @param string $key 秘钥
-     * @return array code=0则加密成功，msg为消息或密文
+     * @return 密文
      */
-    public static function aesEncrypt(string $string, string $key): array
+    public static function aesEncrypt(string $string, string $key): string
     {
         $result = openssl_encrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
         $result = base64_encode($result);
-        return ret_array(0, '', ['token' => $result]);
+        return $result;
     }
 
     /**
      * AES解密
      * @param string $string 要解密的内容
      * @param string $key 秘钥
-     * @return array code=0则解密成功，msg为消息或明文
+     * @return string 明文
      */
-    public static function aesDecrypt(string $string, string $key): array
+    public static function aesDecrypt(string $string, string $key): string
     {
         $string = base64_decode($string);
         $result = openssl_decrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
-        return ret_array(0, '', ['text' => $result]);
+        return $result;
     }
 
     /**
