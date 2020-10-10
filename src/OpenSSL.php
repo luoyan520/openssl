@@ -209,45 +209,28 @@ class OpenSSL
     }
 
     /**
-     * 初始化AES加密密钥
-     * @param string $key 密钥
-     */
-    public function aesInit(string $key = ''): void
-    {
-        if (!$key) $key = Env::get('System.Security_key', 'LuoYan');
-        $key = hash('sha256', $key, false);
-        $this->key = $key;
-    }
-
-    /**
      * AES加密
-     * @param string $string
+     * @param string $string 要加密的内容
+     * @param string $key 秘钥
      * @return array code=0则加密成功，msg为消息或密文
      */
-    public function aesEncrypt(string $string): array
+    public function aesEncrypt(string $string, string $key): array
     {
-        if (!$this->key) {
-            return ret_array(3, '未初始化，请执行aesInit方法！');
-        }
-
-        $result = openssl_encrypt($string, 'AES-128-ECB', $this->key, OPENSSL_RAW_DATA);
+        $result = openssl_encrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
         $result = base64_encode($result);
         return ret_array(0, '', ['token' => $result]);
     }
 
     /**
      * AES解密
-     * @param $string
+     * @param string $string 要解密的内容
+     * @param string $key 秘钥
      * @return array code=0则解密成功，msg为消息或明文
      */
-    public function aesDecrypt(string $string): array
+    public function aesDecrypt(string $string, string $key): array
     {
-        if (!$this->key) {
-            return ret_array(3, '未初始化，请执行aesInit方法！');
-        }
-
         $string = base64_decode($string);
-        $result = openssl_decrypt($string, 'AES-128-ECB', $this->key, OPENSSL_RAW_DATA);
+        $result = openssl_decrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
         return ret_array(0, '', ['text' => $result]);
     }
 
