@@ -214,7 +214,7 @@ class OpenSSL
      * @param string $key 秘钥
      * @return array code=0则加密成功，msg为消息或密文
      */
-    public function aesEncrypt(string $string, string $key): array
+    public static function aesEncrypt(string $string, string $key): array
     {
         $result = openssl_encrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
         $result = base64_encode($result);
@@ -227,7 +227,7 @@ class OpenSSL
      * @param string $key 秘钥
      * @return array code=0则解密成功，msg为消息或明文
      */
-    public function aesDecrypt(string $string, string $key): array
+    public static function aesDecrypt(string $string, string $key): array
     {
         $string = base64_decode($string);
         $result = openssl_decrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
