@@ -3,8 +3,8 @@ declare (strict_types=1);
 
 namespace LuoYan;
 
+use Exception;
 use think\exception\HttpException;
-use think\facade\Env;
 
 class OpenSSL
 {
@@ -15,13 +15,6 @@ class OpenSSL
     private $privateKey;
 
     /**
-     * AES需要用到的属性
-     *
-     * @var string $key AES秘钥
-     */
-    private $key;
-
-    /**
      * OpenSSL constructor.
      * 检测php openssl扩展是否开启
      */
@@ -30,6 +23,32 @@ class OpenSSL
         if (!extension_loaded('openssl')) {
             throw new HttpException(500, '请开启PHP的openssl扩展！');
         }
+    }
+
+    /**
+     * AES加密
+     * @param string $string 要加密的内容
+     * @param string $key 秘钥
+     * @return string 密文
+     * @throws Exception
+     */
+    public static function aesEncrypt(string $string, string $key): string
+    {
+        $result = openssl_encrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
+        $result = base64_encode($result);
+        return $result;
+    }
+
+    /**
+     * AES解密
+     * @param string $string 要解密的内容
+     * @param string $key 秘钥
+     * @return string 明文
+     */
+    public static function aesDecrypt(string $string, string $key): string
+    {
+        $string = base64_decode($string);
+        return openssl_decrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
     }
 
     /**
@@ -206,32 +225,6 @@ class OpenSSL
         } else {
             return false;
         }
-    }
-
-    /**
-     * AES加密
-     * @param string $string 要加密的内容
-     * @param string $key 秘钥
-     * @return 密文
-     */
-    public static function aesEncrypt(string $string, string $key): string
-    {
-        $result = openssl_encrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
-        $result = base64_encode($result);
-        return $result;
-    }
-
-    /**
-     * AES解密
-     * @param string $string 要解密的内容
-     * @param string $key 秘钥
-     * @return string 明文
-     */
-    public static function aesDecrypt(string $string, string $key): string
-    {
-        $string = base64_decode($string);
-        $result = openssl_decrypt($string, 'AES-128-ECB', $key, OPENSSL_RAW_DATA);
-        return $result;
     }
 
     /**
