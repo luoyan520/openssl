@@ -10,6 +10,8 @@ class OpenSSL
 {
     /**
      * RSA需要用到的属性
+     * @var resource $publicKey 公钥
+     * @var resource $privateKey 私钥
      */
     private $publicKey;
     private $privateKey;
@@ -59,23 +61,28 @@ class OpenSSL
      */
     public function rsaInit(string $publicKeyFilename = '', string $privateKeyFilename = '', string $keyPassword = ''): array
     {
+        // 读公钥
         $fp = fopen($publicKeyFilename, 'r');
-        $publicKey = fread($fp, 8192);
+        $public_key = fread($fp, 8192);
         fclose($fp);
-        $this->publicKey = openssl_get_publickey($publicKey);
-        if (!$this->publicKey) {
-            return ret_array(1, '无效的公钥！');
-        }
 
+        // 取出并校验公钥
+        $public_key = openssl_pkey_get_public($public_key);
+        if (!$public_key) return ret_array(1, '无效的公钥！');
+
+        // 读私钥
         $fp = fopen($privateKeyFilename, 'r');
-        $privateKey = fread($fp, 8192);
+        $private_key = fread($fp, 8192);
         fclose($fp);
-        $this->privateKey = openssl_get_privatekey($privateKey, $keyPassword);
-        unset($keyPassword);
-        if (!$this->privateKey) {
-            return ret_array(1, '无效的私钥！');
-        }
 
+        // 取出并校验私钥
+        $private_key = openssl_pkey_get_private($private_key, $keyPassword);
+        unset($keyPassword);
+        if (!$private_key) return ret_array(1, '无效的私钥！');
+
+        // 将公私钥保存到属性
+        $this->public_key = $public_key;
+        $this->privateKey = $private_key;
         return ret_array(0, '初始化成功！');
     }
 
@@ -86,24 +93,31 @@ class OpenSSL
      */
     public function rsaPublicEncrypt(string $string): array
     {
-        if (!$this->publicKey) {
-            return ret_array(3, '未初始化，请执行rsaInit方法！');
-        }
+        // 检测是否已经进行RSA初始化
+        if (!$this->publicKey) return ret_array(3, '未初始化，请执行rsaInit方法！');
 
+        // 初始化结果变量
         $result = '';
+        // 分割需要加密的文本，每100个字符一份
         $str_tmp = str_split($string, 100);
 
+        // 开始循环加密需要加密的文本
         foreach ($str_tmp as $value) {
             $result_tmp = '';
             if (openssl_public_encrypt($value, $result_tmp, $this->publicKey)) {
+                // 加密成功，添加到结果，并标记分隔符
                 $result .= $result_tmp . '[LY]';
             } else {
+                // 加密失败，直接退出
                 return ret_array(2, '公钥加密失败！');
             }
-            $result = rtrim($result, '[LY]');
         }
 
+        // 去除最后一个无效的分割符
+        $result = rtrim($result, '[LY]');
+        // base64编码
         $result = base64_encode($result);
+        // 返回结果
         return ret_array(0, '', ['token' => $result]);
     }
 
@@ -114,24 +128,31 @@ class OpenSSL
      */
     public function rsaPrivateEncrypt(string $string): array
     {
-        if (!$this->privateKey) {
-            return ret_array(3, '未初始化，请执行rsaInit方法！');
-        }
+        // 检测是否已经进行RSA初始化
+        if (!$this->privateKey) return ret_array(3, '未初始化，请执行rsaInit方法！');
 
+        // 初始化结果变量
         $result = '';
+        // 分割需要加密的文本，每100个字符一份
         $str_tmp = str_split($string, 100);
 
+        // 开始循环加密需要加密的文本
         foreach ($str_tmp as $value) {
             $result_tmp = '';
             if (openssl_private_encrypt($value, $result_tmp, $this->privateKey)) {
+                // 加密成功，添加到结果，并标记分隔符
                 $result .= $result_tmp . '[LY]';
             } else {
+                // 加密失败，直接退出
                 return ret_array(2, '私钥加密失败！');
             }
-            $result = rtrim($result, '[LY]');
         }
 
+        // 去除最后一个无效的分割符
+        $result = rtrim($result, '[LY]');
+        // base64编码
         $result = base64_encode($result);
+        // 返回结果
         return ret_array(0, '', ['token' => $result]);
     }
 
@@ -142,24 +163,29 @@ class OpenSSL
      */
     public function rsaPublicDecrypt(string $string): array
     {
-        if (!$this->publicKey) {
-            return ret_array(3, '未初始化，请执行rsaInit方法！');
-        }
+        // 检测是否已经进行RSA初始化
+        if (!$this->publicKey) return ret_array(3, '未初始化，请执行rsaInit方法！');
 
+        // 初始化结果变量
         $result = '';
+        // base64解码待解密的文本
         $string = base64_decode($string);
+        // 通过分隔符进行分离待解密的文本集
         $str_tmp = explode('[LY]', $string);
 
         foreach ($str_tmp as $value) {
             $result_tmp = '';
             $cache = openssl_public_decrypt($value, $result_tmp, $this->publicKey);
             if ($cache) {
+                // 解密成功，添加到结果
                 $result .= $result_tmp;
             } else {
+                // 解密失败，直接退出
                 return ret_array(2, '公钥解密失败！');
             }
         }
 
+        // 返回
         return ret_array(0, '', ['text' => $result]);
     }
 
@@ -170,23 +196,28 @@ class OpenSSL
      */
     public function rsaPrivateDecrypt(string $string): array
     {
-        if (!$this->privateKey) {
-            return ret_array(3, '未初始化，请执行rsaInit方法！');
-        }
+        // 检测是否已经进行RSA初始化
+        if (!$this->privateKey) return ret_array(3, '未初始化，请执行rsaInit方法！');
 
+        // 初始化结果变量
         $result = '';
+        // base64解码待解密的文本
         $string = base64_decode($string);
+        // 通过分隔符进行分离待解密的文本集
         $str_tmp = explode('[LY]', $string);
 
         foreach ($str_tmp as $value) {
             $result_tmp = '';
             if (openssl_private_decrypt($value, $result_tmp, $this->privateKey)) {
+                // 解密成功，添加到结果
                 $result .= $result_tmp;
             } else {
+                // 解密失败，直接退出
                 return ret_array(2, '私钥解密失败！');
             }
         }
 
+        // 返回
         return ret_array(0, '', ['text' => $result]);
     }
 
@@ -201,6 +232,7 @@ class OpenSSL
     {
         openssl_sign($string, $signature, $this->privateKey);
         if ($signature) {
+            // base64编码签名
             $signature = base64_encode($signature);
             return ret_array(0, '', ['sign' => $signature]);
         } else {
@@ -217,14 +249,12 @@ class OpenSSL
      */
     public function rsaVerify(string $signature, string $string): bool
     {
+        // base64解码签名
         $signature = base64_decode($signature);
         if (!$signature) return false;
         $result = openssl_verify($string, $signature, $this->publicKey);
-        if ($result) {
-            return true;
-        } else {
-            return false;
-        }
+        
+        return $result ? true : false;
     }
 
     /**
