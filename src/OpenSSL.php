@@ -61,28 +61,35 @@ class OpenSSL
      */
     public function rsaInit(string $publicKeyFilename = '', string $privateKeyFilename = '', string $keyPassword = ''): array
     {
-        // 读公钥
-        $fp = fopen($publicKeyFilename, 'r');
-        $public_key = fread($fp, 8192);
-        fclose($fp);
+        if ($publicKeyFilename) {
+            // 读公钥
+            $fp = fopen($publicKeyFilename, 'r');
+            $public_key = fread($fp, 8192);
+            fclose($fp);
 
-        // 取出并校验公钥
-        $public_key = openssl_pkey_get_public($public_key);
-        if (!$public_key) return ret_array(1, '无效的公钥！');
+            // 取出并校验公钥
+            $public_key = openssl_pkey_get_public($public_key);
+            if (!$public_key) return ret_array(1, '无效的公钥！');
 
-        // 读私钥
-        $fp = fopen($privateKeyFilename, 'r');
-        $private_key = fread($fp, 8192);
-        fclose($fp);
+            // 将公钥保存到属性
+            $this->publicKey = $public_key;
+        }
 
-        // 取出并校验私钥
-        $private_key = openssl_pkey_get_private($private_key, $keyPassword);
-        unset($keyPassword);
-        if (!$private_key) return ret_array(1, '无效的私钥！');
+        if ($privateKeyFilename) {
+            // 读私钥
+            $fp = fopen($privateKeyFilename, 'r');
+            $private_key = fread($fp, 8192);
+            fclose($fp);
 
-        // 将公私钥保存到属性
-        $this->publicKey = $public_key;
-        $this->privateKey = $private_key;
+            // 取出并校验私钥
+            $private_key = openssl_pkey_get_private($private_key, $keyPassword);
+            unset($keyPassword);
+            if (!$private_key) return ret_array(1, '无效的私钥！');
+
+            // 将私钥保存到属性
+            $this->privateKey = $private_key;
+        }
+
         return ret_array(0, '初始化成功！');
     }
 
