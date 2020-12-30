@@ -81,7 +81,7 @@ class OpenSSL
         if (!$private_key) return ret_array(1, '无效的私钥！');
 
         // 将公私钥保存到属性
-        $this->public_key = $public_key;
+        $this->publicKey = $public_key;
         $this->privateKey = $private_key;
         return ret_array(0, '初始化成功！');
     }
