@@ -253,7 +253,7 @@ class OpenSSL
         $signature = base64_decode($signature);
         if (!$signature) return false;
         $result = openssl_verify($string, $signature, $this->publicKey);
-        
+
         return $result ? true : false;
     }
 
