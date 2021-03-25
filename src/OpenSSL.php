@@ -69,7 +69,7 @@ class OpenSSL
 
             // 取出并校验公钥
             $public_key = openssl_pkey_get_public($public_key);
-            if (!$public_key) return ret_array(1, '无效的公钥！');
+            if (!$public_key) return ['code' => 1, 'msg' => '无效的公钥'];
 
             // 将公钥保存到属性
             $this->publicKey = $public_key;
@@ -84,13 +84,13 @@ class OpenSSL
             // 取出并校验私钥
             $private_key = openssl_pkey_get_private($private_key, $keyPassword);
             unset($keyPassword);
-            if (!$private_key) return ret_array(1, '无效的私钥！');
+            if (!$private_key) return ['code' => 2, 'msg' => '无效的私钥'];
 
             // 将私钥保存到属性
             $this->privateKey = $private_key;
         }
 
-        return ret_array(0, '初始化成功！');
+        return ['code' => 0, 'msg' => '初始化成功'];
     }
 
     /**
@@ -101,7 +101,7 @@ class OpenSSL
     public function rsaPublicEncrypt(string $string): array
     {
         // 检测是否已经进行RSA初始化
-        if (!$this->publicKey) return ret_array(3, '未初始化，请执行rsaInit方法！');
+        if (!$this->publicKey) return ['code' => 1, 'msg' => '未初始化，请执行RSAInit方法'];
 
         // 初始化结果变量
         $result = '';
@@ -116,7 +116,7 @@ class OpenSSL
                 $result .= $result_tmp . '[LY]';
             } else {
                 // 加密失败，直接退出
-                return ret_array(2, '公钥加密失败！');
+                return ['code' => 2, 'msg' => '公钥加密失败'];
             }
         }
 
@@ -125,7 +125,7 @@ class OpenSSL
         // base64编码
         $result = base64_encode($result);
         // 返回结果
-        return ret_array(0, '', ['token' => $result]);
+        return ['code' => 0, 'msg' => '', 'token' => $result];
     }
 
     /**
@@ -136,7 +136,7 @@ class OpenSSL
     public function rsaPrivateEncrypt(string $string): array
     {
         // 检测是否已经进行RSA初始化
-        if (!$this->privateKey) return ret_array(3, '未初始化，请执行rsaInit方法！');
+        if (!$this->privateKey) return ['code' => 1, 'msg' => '未初始化，请执行RsaInit方法'];
 
         // 初始化结果变量
         $result = '';
@@ -151,7 +151,7 @@ class OpenSSL
                 $result .= $result_tmp . '[LY]';
             } else {
                 // 加密失败，直接退出
-                return ret_array(2, '私钥加密失败！');
+                return ['code' => 2, 'msg' => '私钥加密失败'];
             }
         }
 
@@ -160,7 +160,7 @@ class OpenSSL
         // base64编码
         $result = base64_encode($result);
         // 返回结果
-        return ret_array(0, '', ['token' => $result]);
+        return ['code' => 0, 'msg' => '', 'token' => $result];
     }
 
     /**
@@ -171,7 +171,7 @@ class OpenSSL
     public function rsaPublicDecrypt(string $string): array
     {
         // 检测是否已经进行RSA初始化
-        if (!$this->publicKey) return ret_array(3, '未初始化，请执行rsaInit方法！');
+        if (!$this->publicKey) return ['code' => 1, 'msg' => '未初始化，请执行RsaInit方法'];
 
         // 初始化结果变量
         $result = '';
@@ -188,12 +188,12 @@ class OpenSSL
                 $result .= $result_tmp;
             } else {
                 // 解密失败，直接退出
-                return ret_array(2, '公钥解密失败！');
+                return ['code' => 2, 'msg' => '公钥解密失败'];
             }
         }
 
         // 返回
-        return ret_array(0, '', ['text' => $result]);
+        return ['code' => 0, 'msg' => '', 'text' => $result];
     }
 
     /**
@@ -204,7 +204,7 @@ class OpenSSL
     public function rsaPrivateDecrypt(string $string): array
     {
         // 检测是否已经进行RSA初始化
-        if (!$this->privateKey) return ret_array(3, '未初始化，请执行rsaInit方法！');
+        if (!$this->privateKey) return ['code' => 1, 'msg' => '未初始化，请执行RsaInit方法'];
 
         // 初始化结果变量
         $result = '';
@@ -220,12 +220,12 @@ class OpenSSL
                 $result .= $result_tmp;
             } else {
                 // 解密失败，直接退出
-                return ret_array(2, '私钥解密失败！');
+                return ['code' => 2, 'msg' => '私钥解密失败'];
             }
         }
 
         // 返回
-        return ret_array(0, '', ['text' => $result]);
+        return ['code' => 0, 'msg' => '', 'text' => $result];
     }
 
     /**
@@ -241,9 +241,9 @@ class OpenSSL
         if ($signature) {
             // base64编码签名
             $signature = base64_encode($signature);
-            return ret_array(0, '', ['sign' => $signature]);
+            return ['code' => 0, 'msg' => '', 'sign' => $signature];
         } else {
-            return ret_array(4, '签名失败！');
+            return ['code' => 1, 'msg' => '私钥签名失败'];
         }
     }
 
