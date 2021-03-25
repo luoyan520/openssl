@@ -125,7 +125,7 @@ class OpenSSL
         // base64编码
         $result = base64_encode($result);
         // 返回结果
-        return ['code' => 0, 'msg' => '', ['data' => ['token' => $result]]];
+        return ['code' => 0, 'msg' => '', 'data' => ['token' => $result]];
     }
 
     /**
@@ -160,7 +160,7 @@ class OpenSSL
         // base64编码
         $result = base64_encode($result);
         // 返回结果
-        return ['code' => 0, 'msg' => '', ['data' => ['token' => $result]]];
+        return ['code' => 0, 'msg' => '', 'data' => ['token' => $result]];
     }
 
     /**
@@ -193,7 +193,7 @@ class OpenSSL
         }
 
         // 返回
-        return ['code' => 0, 'msg' => '', ['data' => ['text' => $result]]];
+        return ['code' => 0, 'msg' => '', 'data' => ['text' => $result]];
     }
 
     /**
@@ -225,7 +225,7 @@ class OpenSSL
         }
 
         // 返回
-        return ['code' => 0, 'msg' => '', ['data' => ['text' => $result]]];
+        return ['code' => 0, 'msg' => '', 'data' => ['text' => $result]];
     }
 
     /**
@@ -241,7 +241,7 @@ class OpenSSL
         if ($signature) {
             // base64编码签名
             $signature = base64_encode($signature);
-            return ['code' => 0, 'msg' => '', ['data' => ['sign' => $signature]]];
+            return ['code' => 0, 'msg' => '', 'data' => ['sign' => $signature]];
         } else {
             return ['code' => 1, 'msg' => '私钥签名失败'];
         }
